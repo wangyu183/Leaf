@@ -53,6 +53,7 @@ public class SnowflakeZookeeperHolder {
             Stat stat = curator.checkExists().forPath(PATH_FOREVER);
             if (stat == null) {
                 //不存在根节点,机器第一次启动,创建/snowflake/ip:port-000000000,并上传数据
+                //永久有序节点，会自动添加有顺序int值
                 zk_AddressNode = createNode(curator);
                 //worker id 默认是0
                 updateLocalWorkerID(workerID);
@@ -152,6 +153,7 @@ public class SnowflakeZookeeperHolder {
 
     private void updateNewData(CuratorFramework curator, String path) {
         try {
+            //如果发生时钟回拨，则不上传，避免出现问题
             if (System.currentTimeMillis() < lastUpdateTime) {
                 return;
             }
